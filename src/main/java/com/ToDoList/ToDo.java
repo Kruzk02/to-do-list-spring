@@ -1,9 +1,6 @@
 package com.ToDoList;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 @Entity
 public class ToDo{
@@ -13,8 +10,17 @@ public class ToDo{
     private long id;
     private String title;
     private String description;
-    private boolean completed;
+    private String status;
 
+    public ToDo() {
+    }
+
+    public ToDo(long id, String title, String description, String status) {
+        this.id = id;
+        this.title = title;
+        this.description = description;
+        this.status = status;
+    }
 
     public long getId() {
         return id;
@@ -40,11 +46,11 @@ public class ToDo{
         this.description = description;
     }
 
-    public boolean isCompleted() {
-        return completed;
+    public String getStatus() {
+        return status;
     }
 
-    public void setCompleted(boolean completed) {
-        this.completed = completed;
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

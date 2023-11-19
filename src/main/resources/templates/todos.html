@@ -8,60 +8,260 @@
         integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
         crossorigin="anonymous">
   <style>
-    .todo-item {
-      margin-bottom: 10px;
+      body {
+      background-color: #191919;
     }
+
+    .container {
+      width: 70%;
+      min-width: 50%;
+      margin: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .kanban-heading {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      font-family: sans-serif;
+    }
+
+    .kanban-board {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      font-family: sans-serif;
+    }
+
+    .kanban-heading-text {
+      font-size: 1.8rem;
+      background-color: tomato;
+      padding: 0.8rem 1.7rem;
+      border-radius: 0.5rem;
+      margin: 1rem;
+    }
+
+    .kanban-block,
+    .create-new-task-block {
+      padding: 0.6rem;
+      width: 30.5%;
+      min-width: 14rem;
+      min-height: 4.5rem;
+      border-radius: 0.3rem;
+    }
+
+    #todo {
+      background-color: #464646;
+    }
+
+    #inprogress {
+      background-color: #464646;
+    }
+
+    #done {
+      background-color: #464646;
+    }
+
+    .task {
+      background-color: white;
+      margin: 0.2rem 0rem 0.3rem 0rem;
+      border: 0.1rem solid black;
+      border-radius: 0.2rem;
+      padding: 0.5rem 0.2rem 0.5rem 2rem;
+    }
+
+    #task-button {
+      margin: 0.2rem 0rem 0.1rem 0rem;
+      background-color: white;
+      border-radius: 0.2rem;
+      width: 100%;
+      border: 0.25rem solid black;
+      padding: 0.5rem 2.7rem;
+      border-radius: 0.3rem;
+      font-size: 1rem;
+    }
+
+    .create-new-task-block {
+      display: none;
+      /* display: flex; */
+      background: #464646;
+      width: 64.4%;
+      flex-direction: column;
+    }
+
+    .form-row {
+      display: flex;
+      flex-direction: row;
+      margin: 0.2rem;
+    }
+
+    .form-row-label {
+      width: 15%;
+      padding: 0.2rem;
+      padding-right: 0.5rem;
+      border: 0.1rem solid white;
+      border-right: 0;
+      border-radius: 0.2rem 0rem 0rem 0.2rem;
+    }
+
+    .form-row-input {
+      border: 0.1rem solid white;
+      border-radius: 0rem 0.2rem 0.2rem 0rem;
+      width: 85%;
+    }
+
+    textarea {
+      resize: none;
+    }
+
+    .form-row-buttons {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      margin: 0.2rem;
+    }
+
+    #save-button {
+      margin: 0.2rem 0rem 0.1rem 0rem;
+      background-color: white;
+      border-radius: 0.2rem;
+      width: 49.2%;
+      border: 0.25rem solid black;
+      padding: 0.5rem 2.7rem;
+      border-radius: 0.3rem;
+      font-size: 1rem;
+    }
+    .delete-button {
+    background-color: #ff0000; /* Red color or any color you prefer */
+    color: #fff; /* Text color */
+    border: none;
+    padding: 0.3rem 0.6rem;
+    border-radius: 0.2rem;
+    cursor: pointer;
+    float: right; /* Align the button to the right */
+    
+  }
   </style>
 </head>
 <body>
 <div class="container">
-  <div class="row">
-    <div class="col-md-6 offset-md-3">
-
-      <h1 class="text-center">Todo List</h1>
-
-      <div class="card mb-3">
-        <div class="card-body">
-
-          <form th:action="@{/todos}" method="post">
-            <div class="form-group">
-              <input type="text" name="title" class="form-control" placeholder="Enter a new todo">
-            </div>
-            <div class="form-group">
-              <input type="text" name="description" class="form-control" placeholder="Enter a description">
-            </div>
-            <button type="submit" class="btn btn-primary">Add Todo</button>
-          </form>
-
-        </div>
-      </div>
-
-      <ul class="list-group-item">
-
-        <li th:each="todo : ${todos}" class="list-group-item todo-item">
-          <form th:action="@{/todos/update}" method="post">
-            <input type="hidden" name="id" th:value="${todo.id}">
-
-            <div class="form-check">
-
-              <input type="checkbox" class="form-check-input" th:checked="${todo.completed}"
-                     th:disabled="${todo.completed}" onchange="this.form.submit()">
-              <label class="form-check-label" th:class="${todo.completed} ? 'completed' : ''">
-                <span th:text="${todo.title}"></span>
-              </label>
-
-            </div>
-
-            <p class="mb-0" th:text="${todo.description}"></p>
-
-            <input type="hidden" name="id" th:value="${todo.id}">
-            <button type="submit" class="btn btn-danger btn-sm" formaction="/todos/delete">Delete</button>
-
-          </form>
-        </li>
-      </ul>
+    <div class="kanban-heading">
+        <strong class="kanban-heading-text">Kanban Board</strong>
     </div>
-  </div>
+    <div class="kanban-board">
+        <div class="kanban-block" id="todo" ondrop="drop(event)" ondragover="allowDrop(event)">
+            <strong class="bg-danger">To Do</strong>
+            <div class="task-button-block">
+                <button id="task-button" onclick="createTask()">Create new task</span>
+            </div>
+            <div th:each="todo: ${todos}" th:if="${todo.status == 'todo'}">
+                <form method="post" th:action="@{/todos/delete/{id}(id=${todo.id})}">
+                    <div class="task" id="task1" draggable="true" ondragstart="drag(event)">
+                        <input type="hidden" name="id" th:value="${todo.id}">
+                        <span th:text="${todo.title}">Title</span>
+                        <p th:text="${todo.description}">Description</p>
+                        <button type="submit" class="delete-button">Delete</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="kanban-block" id="inprogress" ondrop="drop(event)" ondragover="allowDrop(event)">
+            <strong class="bg-info">In Progress</strong>
+            <div th:each="todo:${todos}" th:if="${todo.status == 'inprogress'}">
+              <form method="post" th:action="@{/todos/delete/{id}(id=${todo.id})}">
+                  <div class="task" draggable="true" ondragstart="drag(event)">
+                    <span th:text="${todo.title}"></span>
+                    <p th:text="'Description: ' + ${todo.description}"></p>
+                    <button type="submit" class="delete-button">Delete</button>
+                  </div>
+              </form>
+            </div>
+        </div>
+        <div class="kanban-block" id="done" ondrop="drop(event)" ondragover="allowDrop(event)">
+            <strong class="bg-success">Done</strong>
+            <div th:each="todo: ${todos}" th:if="${todo.status == 'done'}">
+                <form method="post" th:action="@{/todos/delete/{id}(id=${todo.id})}">
+                    <div class="task" draggable="true" ondragstart="drag(event)">
+                        <span th:text="${todo.title}"></span>
+                        <p th:text="'Description: ' + ${todo.description}"></p>
+                        <button type="submit" class="delete-button">Delete</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="create-new-task-block" id="create-new-task-block">
+            <form th:action="@{/todos/}" method="post">
+                <span class="form-row">
+                    <label class="form-row-label text-white" for="task-name">Task</label>
+                    <input class="form-row-input" type="text" name="title" id="task-name">
+                </span>
+                <span class="form-row">
+                    <label class="form-row-label text-white" for="task-description">Description</label>
+                    <textarea class="form-row-input" name="description" id="task-description" cols="70" rows="10"></textarea>
+                </span>
+                <span class="form-row">
+                    <label class="form-row-label text-white" for="task-status">Status</label>
+                    <select class="form-row-input" name="status" id="task-status">
+                        <option value="todo">To Do</option>
+                        <option value="inprogress">In Progress</option>
+                        <option value="done">Done</option>
+                    </select>
+                </span>
+                    <span class="form-row-buttons">
+                    <button id="save-button" onclick="saveTask()">Save</button>
+                </span>
+            </form>
+        </div>
+    </div>
 </div>
+<script>
+  function drag(ev) {
+    ev.dataTransfer.setData("text", ev.target.id);
+  }
+
+  function allowDrop(ev) {
+    ev.preventDefault();
+  }
+
+  function drop(ev) {
+    ev.preventDefault();
+    var data = ev.dataTransfer.getData("text");
+    var draggedElement = document.getElementById(data);
+    var parentElement = draggedElement.parentElement;
+
+    if (ev.target.classList.contains("delete-button")) {
+      parentElement.removeChild(draggedElement);
+    } else {
+      ev.currentTarget.appendChild(draggedElement);
+    }
+  }
+
+  function createTask(){
+    var x = document.getElementById("inprogress");
+    var y = document.getElementById("done");
+    var z = document.getElementById("create-new-task-block");
+    if (x.style.display === "none") {
+      x.style.display = "block";
+      y.style.display = "block";
+      z.style.display = "none";
+    } else {
+      x.style.display = "none";
+      y.style.display = "none";
+      z.style.display = "flex";
+    }
+  }
+
+  function saveTask(){
+    var todo = document.getElementById("todo");
+    var taskName = document.getElementById("task-name").value;
+    todo.innerHTML += `
+      <div class="task" id="${taskName.toLowerCase().split(" ").join("")}" draggable="true" ondragstart="drag(event)">
+      <span>${taskName}</span>
+      </div>
+      `
+  }
+
+</script>
 </body>
 </html>
